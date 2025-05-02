@@ -51,13 +51,13 @@ export default function HomePage() {
                       <Link to="/register">Get Started</Link>
                     </Button>
                     <Button size="lg" variant="outline" className="border-white text-white hover:bg-white/10" asChild>
-                      <Link to="/login" className="color: green\n">Login</Link>
+                      <Link to="/login" style={{ backgroundColor: "#3355" }}>Login</Link>
                     </Button>
                   </>}
               </div>
             </div>
             <div className="md:w-1/3 mt-8 md:mt-0">
-              <img src="/placeholder.svg" alt="Students sharing rides" className="w-full rounded-lg shadow-lg" />
+              <img src="/placeholder.png" alt="Students sharing rides" className="w-full rounded-lg shadow-lg" />
             </div>
           </div>
         </div>
@@ -70,7 +70,7 @@ export default function HomePage() {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             <div className="flex flex-col items-center text-center hover-scale">
               <div className="bg-lau-light p-4 rounded-full mb-4">
-                <User className="w-10 h-10 text-lau-green" />
+                {/* <User className="w-10 h-10 text-lau-green" /> */}
               </div>
               <h3 className="text-xl font-semibold mb-2">Create an Account</h3>
               <p className="text-gray-600">
@@ -173,9 +173,9 @@ export default function HomePage() {
       </section>
     </div>;
 }
-function User(props: any) {
-  return <svg {...props} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2" />
-      <circle cx="12" cy="7" r="4" />
-    </svg>;
-}
+// function User(props: any) {
+//   return <svg {...props} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+//       <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2" />
+//       <circle cx="12" cy="7" r="4" />
+//     </svg>;
+// }
