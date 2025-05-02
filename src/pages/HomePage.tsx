@@ -1,15 +1,22 @@
+
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
+import { useRides } from "@/contexts/RideContext";
 import { Car, MapPin, Calendar, ArrowRight } from "lucide-react";
-import { mockRides } from "@/data/mockData";
 import RideCard from "@/components/rides/RideCard";
 
 export default function HomePage() {
   const { isAuthenticated, userRole } = useAuth();
-  const [featuredRides, setFeaturedRides] = useState(mockRides.slice(0, 3));
+  const { rides } = useRides();
+  const [featuredRides, setFeaturedRides] = useState([]);
   const [isLoaded, setIsLoaded] = useState(false);
+
+  // Update featured rides when rides change
+  useEffect(() => {
+    setFeaturedRides(rides.slice(0, 3));
+  }, [rides]);
 
   // Hook for animations
   useEffect(() => {

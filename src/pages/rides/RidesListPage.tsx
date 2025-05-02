@@ -1,10 +1,9 @@
-
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Link } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
-import { mockRides } from "@/data/mockData";
+import { useRides } from "@/contexts/RideContext";
 import { Ride } from "@/types";
 import RideCard from "@/components/rides/RideCard";
 import { format } from "date-fns";
@@ -18,8 +17,8 @@ import SOSButton from "@/components/common/SOSButton";
 
 export default function RidesListPage() {
   const { isAuthenticated, userRole, user } = useAuth();
-  const [rides, setRides] = useState<Ride[]>(mockRides);
-  const [filteredRides, setFilteredRides] = useState<Ride[]>(mockRides);
+  const { rides, loading } = useRides();
+  const [filteredRides, setFilteredRides] = useState<Ride[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [activeTab, setActiveTab] = useState("all");
   const [dateFilter, setDateFilter] = useState("");
@@ -29,6 +28,8 @@ export default function RidesListPage() {
 
   // Effect to filter rides based on search and filters
   useEffect(() => {
+    if (loading) return;
+    
     let filtered = [...rides];
 
     // Search query filter
@@ -73,7 +74,7 @@ export default function RidesListPage() {
     }
 
     setFilteredRides(filtered);
-  }, [rides, searchQuery, activeTab, dateFilter, campusFilter, femaleOnlyFilter]);
+  }, [rides, searchQuery, activeTab, dateFilter, campusFilter, femaleOnlyFilter, loading]);
 
   const handleResetFilters = () => {
     setSearchQuery("");
@@ -182,7 +183,11 @@ export default function RidesListPage() {
             </Tabs>
           </div>
 
-          {filteredRides.length > 0 ? (
+          {loading ? (
+            <div className="text-center py-16 bg-white rounded-lg shadow-sm">
+              <p>Loading rides...</p>
+            </div>
+          ) : filteredRides.length > 0 ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8 animate-fade-in">
               {filteredRides.map((ride) => (
                 <RideCard key={ride.id} ride={ride} />

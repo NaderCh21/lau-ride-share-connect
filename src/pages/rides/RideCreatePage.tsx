@@ -22,6 +22,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import Layout from "@/components/layout/Layout";
 import { format } from "date-fns";
 import { useAuth } from "@/contexts/AuthContext";
+import { useRides } from "@/contexts/RideContext";
 import { Car, AlertTriangle } from "lucide-react";
 import SOSButton from "@/components/common/SOSButton";
 
@@ -44,6 +45,7 @@ export default function RideCreatePage() {
   const { toast } = useToast();
   const navigate = useNavigate();
   const { user } = useAuth();
+  const { addRide } = useRides();
 
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
@@ -75,16 +77,36 @@ export default function RideCreatePage() {
       return;
     }
 
-    // In a real application, this would send the data to the server
-    // For demo purposes, we'll simulate a successful submission
-    setTimeout(() => {
+    try {
+      // Add the new ride using our context
+      addRide({
+        driverId: user?.id || 'd1', // Fallback to mock driver if needed
+        driver: user?.role === 'driver' ? user : undefined,
+        departureLocation: values.departureLocation,
+        destination: values.destination,
+        departureTime: values.departureTime,
+        departureDate: values.departureDate,
+        availableSeats: values.availableSeats,
+        isFemaleOnly: values.isFemaleOnly,
+        route: values.route,
+        notes: values.notes || undefined,
+        price: values.price || 0,
+      });
+
+      // Navigate to rides list after a short delay
+      setTimeout(() => {
+        setIsSubmitting(false);
+        navigate("/rides");
+      }, 500);
+    } catch (error) {
+      console.error("Error creating ride:", error);
       toast({
-        title: "Ride created",
-        description: "Your ride has been successfully created.",
+        title: "Error",
+        description: "There was a problem creating your ride.",
+        variant: "destructive",
       });
       setIsSubmitting(false);
-      navigate("/rides");
-    }, 1000);
+    }
   };
 
   return (
