@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
@@ -6,10 +5,14 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useRides } from "@/contexts/RideContext";
 import { Car, MapPin, Calendar, ArrowRight } from "lucide-react";
 import RideCard from "@/components/rides/RideCard";
-
 export default function HomePage() {
-  const { isAuthenticated, userRole } = useAuth();
-  const { rides } = useRides();
+  const {
+    isAuthenticated,
+    userRole
+  } = useAuth();
+  const {
+    rides
+  } = useRides();
   const [featuredRides, setFeaturedRides] = useState([]);
   const [isLoaded, setIsLoaded] = useState(false);
 
@@ -23,14 +26,9 @@ export default function HomePage() {
     // Mark as loaded to prevent flashing
     setIsLoaded(true);
   }, []);
-
-  return (
-    <div className="flex flex-col min-h-screen">
+  return <div className="flex flex-col min-h-screen">
       {/* Hero Section */}
-      <section 
-        id="hero-section" 
-        className={`bg-gradient-to-r from-lau-green to-lau-dark py-16 md:py-24 transition-opacity duration-500 ${isLoaded ? 'opacity-100' : 'opacity-0'}`}
-      >
+      <section id="hero-section" className={`bg-gradient-to-r from-lau-green to-lau-dark py-16 md:py-24 transition-opacity duration-500 ${isLoaded ? 'opacity-100' : 'opacity-0'}`}>
         <div className="container mx-auto px-6">
           <div className="flex flex-col md:flex-row items-center justify-between">
             <div className="md:w-1/2 text-white">
@@ -41,53 +39,25 @@ export default function HomePage() {
                 Connect with fellow students and share rides to and from campus safely and conveniently.
               </p>
               <div className="flex flex-col sm:flex-row gap-4">
-                {isAuthenticated ? (
-                  <>
-                    <Button 
-                      size="lg" 
-                      className="bg-white text-lau-green hover:bg-gray-100"
-                      asChild
-                    >
+                {isAuthenticated ? <>
+                    <Button size="lg" className="bg-white text-lau-green hover:bg-gray-100" asChild>
                       <Link to="/rides">Find a Ride</Link>
                     </Button>
-                    {userRole === "driver" && (
-                      <Button 
-                        size="lg" 
-                        variant="outline" 
-                        className="border-white text-white hover:bg-white/10"
-                        asChild
-                      >
+                    {userRole === "driver" && <Button size="lg" variant="outline" className="border-white text-white hover:bg-white/10" asChild>
                         <Link to="/rides/create">Offer a Ride</Link>
-                      </Button>
-                    )}
-                  </>
-                ) : (
-                  <>
-                    <Button 
-                      size="lg" 
-                      className="bg-white text-lau-green hover:bg-gray-100"
-                      asChild
-                    >
+                      </Button>}
+                  </> : <>
+                    <Button size="lg" className="bg-white text-lau-green hover:bg-gray-100" asChild>
                       <Link to="/register">Get Started</Link>
                     </Button>
-                    <Button 
-                      size="lg" 
-                      variant="outline" 
-                      className="border-white text-white hover:bg-white/10"
-                      asChild
-                    >
-                      <Link to="/login">Login</Link>
+                    <Button size="lg" variant="outline" className="border-white text-white hover:bg-white/10" asChild>
+                      <Link to="/login" className="color: green\n">Login</Link>
                     </Button>
-                  </>
-                )}
+                  </>}
               </div>
             </div>
             <div className="md:w-1/3 mt-8 md:mt-0">
-              <img 
-                src="/placeholder.svg" 
-                alt="Students sharing rides" 
-                className="w-full rounded-lg shadow-lg"
-              />
+              <img src="/placeholder.svg" alt="Students sharing rides" className="w-full rounded-lg shadow-lg" />
             </div>
           </div>
         </div>
@@ -132,10 +102,7 @@ export default function HomePage() {
       </section>
 
       {/* Featured Rides */}
-      <section 
-        id="featured-section"
-        className={`py-16 bg-gray-50 transition-opacity duration-500 ${isLoaded ? 'opacity-100' : 'opacity-0'}`}
-      >
+      <section id="featured-section" className={`py-16 bg-gray-50 transition-opacity duration-500 ${isLoaded ? 'opacity-100' : 'opacity-0'}`}>
         <div className="container mx-auto px-6">
           <div className="flex justify-between items-center mb-8">
             <h2 className="text-2xl font-bold">Featured Rides</h2>
@@ -147,9 +114,7 @@ export default function HomePage() {
           </div>
           
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {featuredRides.map(ride => (
-              <RideCard key={ride.id} ride={ride} />
-            ))}
+            {featuredRides.map(ride => <RideCard key={ride.id} ride={ride} />)}
           </div>
         </div>
       </section>
@@ -199,45 +164,18 @@ export default function HomePage() {
             Join our community of LAU students sharing rides to make commuting easier, cheaper, and more sustainable.
           </p>
           
-          {isAuthenticated ? (
-            <Button 
-              size="lg" 
-              className="bg-white text-lau-green hover:bg-gray-100"
-              asChild
-            >
+          {isAuthenticated ? <Button size="lg" className="bg-white text-lau-green hover:bg-gray-100" asChild>
               <Link to="/rides">Find Available Rides</Link>
-            </Button>
-          ) : (
-            <Button 
-              size="lg" 
-              className="bg-white text-lau-green hover:bg-gray-100"
-              asChild
-            >
+            </Button> : <Button size="lg" className="bg-white text-lau-green hover:bg-gray-100" asChild>
               <Link to="/register">Sign Up Now</Link>
-            </Button>
-          )}
+            </Button>}
         </div>
       </section>
-    </div>
-  );
+    </div>;
 }
-
 function User(props: any) {
-  return (
-    <svg
-      {...props}
-      xmlns="http://www.w3.org/2000/svg"
-      width="24"
-      height="24"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
+  return <svg {...props} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
       <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2" />
       <circle cx="12" cy="7" r="4" />
-    </svg>
-  )
+    </svg>;
 }
