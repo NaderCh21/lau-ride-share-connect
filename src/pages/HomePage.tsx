@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
@@ -10,22 +9,12 @@ import RideCard from "@/components/rides/RideCard";
 export default function HomePage() {
   const { isAuthenticated, userRole } = useAuth();
   const [featuredRides, setFeaturedRides] = useState(mockRides.slice(0, 3));
+  const [isLoaded, setIsLoaded] = useState(false);
 
   // Hook for animations
   useEffect(() => {
-    // Add animations when component mounts
-    const heroElement = document.getElementById('hero-section');
-    const featuredElement = document.getElementById('featured-section');
-    
-    if (heroElement) {
-      heroElement.classList.add('animate-fade-in');
-    }
-    
-    if (featuredElement) {
-      setTimeout(() => {
-        featuredElement.classList.add('animate-fade-in');
-      }, 300);
-    }
+    // Mark as loaded to prevent flashing
+    setIsLoaded(true);
   }, []);
 
   return (
@@ -33,7 +22,7 @@ export default function HomePage() {
       {/* Hero Section */}
       <section 
         id="hero-section" 
-        className="bg-gradient-to-r from-lau-green to-lau-dark py-16 md:py-24 opacity-0"
+        className={`bg-gradient-to-r from-lau-green to-lau-dark py-16 md:py-24 transition-opacity duration-500 ${isLoaded ? 'opacity-100' : 'opacity-0'}`}
       >
         <div className="container mx-auto px-6">
           <div className="flex flex-col md:flex-row items-center justify-between">
@@ -138,7 +127,7 @@ export default function HomePage() {
       {/* Featured Rides */}
       <section 
         id="featured-section"
-        className="py-16 bg-gray-50 opacity-0"
+        className={`py-16 bg-gray-50 transition-opacity duration-500 ${isLoaded ? 'opacity-100' : 'opacity-0'}`}
       >
         <div className="container mx-auto px-6">
           <div className="flex justify-between items-center mb-8">
