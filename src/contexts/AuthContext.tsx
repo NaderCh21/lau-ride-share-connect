@@ -65,15 +65,30 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     try {
       // In a real app, this would make an API call
       // For demo, we'll simulate registration
-      const newUser = {
+      const baseUserData = {
         id: `u${Date.now()}`,
         createdAt: new Date().toISOString(),
         status: "active" as const,
         isVerified: false,
-        ...userData,
       };
       
-      setUser(newUser as Driver | Passenger);
+      // Create the appropriate user type based on role
+      let newUser;
+      if (userData.role === "driver") {
+        newUser = {
+          ...baseUserData,
+          ...userData,
+          role: "driver" as const, // Ensure TypeScript knows this is a constant "driver"
+        } as Driver;
+      } else {
+        newUser = {
+          ...baseUserData,
+          ...userData,
+          role: "passenger" as const, // Ensure TypeScript knows this is a constant "passenger"
+        } as Passenger;
+      }
+      
+      setUser(newUser);
       localStorage.setItem("user", JSON.stringify(newUser));
       
       return Promise.resolve();
@@ -88,7 +103,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     if (!user) return Promise.reject(new Error("Not authenticated"));
     
     try {
-      const updatedUser = { ...user, ...userData };
+      // Make sure we're maintaining the correct type
+      const updatedUser = {
+        ...user,
+        ...userData,
+        role: user.role, // Preserve the original role to maintain type safety
+      } as Driver | Passenger;
+      
       setUser(updatedUser);
       localStorage.setItem("user", JSON.stringify(updatedUser));
       

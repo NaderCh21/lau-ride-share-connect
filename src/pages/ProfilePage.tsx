@@ -30,6 +30,7 @@ import Layout from "@/components/layout/Layout";
 import SOSButton from "@/components/common/SOSButton";
 import { Star, Shield, UserCog } from "lucide-react";
 
+// Create schema for base form fields (shared between driver and passenger)
 const baseFormSchema = z.object({
   fullName: z.string().min(2, "Name must be at least 2 characters"),
   campus: z.enum(["Beirut", "Byblos"]),
@@ -37,6 +38,7 @@ const baseFormSchema = z.object({
   contactNumber: z.string().min(8, "Please enter a valid phone number"),
 });
 
+// Create schema for driver-specific fields
 const driverFormSchema = baseFormSchema.extend({
   vehicleMake: z.string().min(2, "Vehicle make must be at least 2 characters"),
   vehicleModel: z.string().min(2, "Vehicle model must be at least 2 characters"),
@@ -50,7 +52,7 @@ export default function ProfilePage() {
   const { user, updateProfile, userRole } = useAuth();
   const { toast } = useToast();
 
-  // We'll use different schemas based on user role
+  // Determine which schema to use based on user role
   const formSchema = userRole === "driver" ? driverFormSchema : baseFormSchema;
   type FormValues = z.infer<typeof formSchema>;
 
@@ -75,21 +77,26 @@ export default function ProfilePage() {
     setIsLoading(true);
     try {
       // Prepare data based on user role
-      const userData = {
+      const baseUserData = {
         fullName: values.fullName,
         campus: values.campus,
         residencyLocation: values.residencyLocation,
         contactNumber: values.contactNumber,
-        ...(userRole === "driver" && {
-          vehicleInfo: {
-            make: values.vehicleMake,
-            model: values.vehicleModel,
-            year: values.vehicleYear,
-            color: values.vehicleColor,
-            plateNumber: values.vehiclePlateNumber,
-          },
-        }),
       };
+      
+      // Add vehicle info only for drivers
+      const userData = userRole === "driver" 
+        ? {
+            ...baseUserData,
+            vehicleInfo: {
+              make: (values as any).vehicleMake,
+              model: (values as any).vehicleModel,
+              year: (values as any).vehicleYear,
+              color: (values as any).vehicleColor,
+              plateNumber: (values as any).vehiclePlateNumber,
+            },
+          }
+        : baseUserData;
 
       await updateProfile(userData);
       toast({
@@ -272,9 +279,10 @@ export default function ProfilePage() {
                             <div className="border-t pt-6 mt-6">
                               <h3 className="text-lg font-medium mb-4">Vehicle Information</h3>
                               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                {/* Use TypeScript casting to handle driver-specific fields */}
                                 <FormField
                                   control={form.control}
-                                  name="vehicleMake"
+                                  name={"vehicleMake" as any}
                                   render={({ field }) => (
                                     <FormItem>
                                       <FormLabel>Vehicle Make</FormLabel>
@@ -288,7 +296,7 @@ export default function ProfilePage() {
 
                                 <FormField
                                   control={form.control}
-                                  name="vehicleModel"
+                                  name={"vehicleModel" as any}
                                   render={({ field }) => (
                                     <FormItem>
                                       <FormLabel>Vehicle Model</FormLabel>
@@ -302,7 +310,7 @@ export default function ProfilePage() {
 
                                 <FormField
                                   control={form.control}
-                                  name="vehicleYear"
+                                  name={"vehicleYear" as any}
                                   render={({ field }) => (
                                     <FormItem>
                                       <FormLabel>Vehicle Year</FormLabel>
@@ -316,7 +324,7 @@ export default function ProfilePage() {
 
                                 <FormField
                                   control={form.control}
-                                  name="vehicleColor"
+                                  name={"vehicleColor" as any}
                                   render={({ field }) => (
                                     <FormItem>
                                       <FormLabel>Vehicle Color</FormLabel>
@@ -330,7 +338,7 @@ export default function ProfilePage() {
 
                                 <FormField
                                   control={form.control}
-                                  name="vehiclePlateNumber"
+                                  name={"vehiclePlateNumber" as any}
                                   render={({ field }) => (
                                     <FormItem>
                                       <FormLabel>License Plate Number</FormLabel>
