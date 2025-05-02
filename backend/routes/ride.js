@@ -13,6 +13,7 @@ const {
   respondToRequest,
   requestRide,
   triggerSOS,
+  checkRideStatus,
 } = require("../controllers/rideController");
 
 router.get("/getAllRides", authMiddleware, getRides);
@@ -27,5 +28,11 @@ router.get("/driver/My-rides", authMiddleware, getDriverRides);
 
 router.post("/respond", authMiddleware, respondToRequest);
 router.post("/request", authMiddleware, requestRide);
+
+router.get(
+  "/passenger/rideStatus/:rideRequestId",
+  authMiddleware,
+  checkRideStatus
+);
 
 module.exports = router;

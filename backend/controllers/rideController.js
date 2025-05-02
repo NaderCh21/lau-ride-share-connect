@@ -228,25 +228,52 @@ const respondToRequest = async (req, res) => {
 //Passenger
 const requestRide = async (req, res) => {
   try {
-    const userId = req.user.id;
     const { rideId } = req.body;
-
-    const ride = await Ride.findById(rideId);
-
-    if (!ride) return res.status(404).json({ message: "Ride not found" });
-    if (
-      ride.pendingRequests.includes(userId) ||
-      ride.passengerIdsList.includes(userId)
-    ) {
-      return res.status(400).json({ message: "Already requested or accepted" });
+    if (!rideId) {
+      return res.status(400).json({ error: "Ride ID is required" });
     }
 
-    ride.pendingRequests.push(userId);
-    await ride.save();
+    // The passenger's ID is set by requireAuth middleware in req.user
+    const passengerId = req.user._id;
 
-    res.status(200).json({ message: "Ride request sent" });
+    // Create a new ride request with status defaulting to "pending"
+    const newRequest = await RideRequest.create({
+      rideId,
+      passengerId,
+      status: "pending",
+    });
+
+    res.status(201).json({
+      message: "Ride request created successfully",
+      rideRequest: newRequest,
+    });
   } catch (error) {
-    res.status(500).json({ message: "Server error", error: error.message });
+    res.status(500).json({ error: error.message });
+  }
+};
+
+// Passenger checks the status of their ride request
+const checkRideStatus = async (req, res) => {
+  try {
+    const { rideRequestId } = req.params;
+    const rideRequest = await RideRequest.findById(rideRequestId);
+    if (!rideRequest) {
+      return res.status(404).json({ error: "Ride request not found" });
+    }
+
+    if (rideRequest.passengerId.toString() !== req.user._id.toString()) {
+      return res
+        .status(403)
+        .json({ error: "Not authorized to view this ride request" });
+    }
+
+    res.status(200).json({
+      message: "Ride request status retrieved successfully",
+      status: rideRequest.status,
+      rideRequest,
+    });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
   }
 };
 
@@ -261,4 +288,5 @@ module.exports = {
   punchInRide,
   punchOutRide,
   triggerSOS,
+  checkRideStatus,
 };
