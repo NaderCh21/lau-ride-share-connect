@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -14,20 +13,33 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useToast } from "@/hooks/use-toast";
 import QRCodeValidator from "@/components/common/QRCodeValidator";
 import SOSButton from "@/components/common/SOSButton";
-import { CheckCircle, AlertTriangle, XCircle, Clock, MapPin, Calendar, Car, MessageSquare } from "lucide-react";
+import { useRides } from "@/contexts/RideContext";
+import ActiveRideBanner from "@/components/rides/ActiveRideBanner";
+import FeedbackDialog from "@/components/rides/FeedbackDialog";
+import {
+  CheckCircle, AlertTriangle, XCircle, Clock, MapPin, Calendar, Car, MessageSquare,
+  PlayCircle, StopCircle
+} from "lucide-react";
 
 export default function BookingsPage() {
   const { user, userRole } = useAuth();
   const { toast } = useToast();
+  const { bookings: contextBookings, startRide, finishRide } = useRides();
+  
   const [bookings, setBookings] = useState<Booking[]>([]);
   const [offeredRides, setOfferedRides] = useState<Ride[]>([]);
   const [currentTab, setCurrentTab] = useState("upcoming");
+  const [feedbackBooking, setFeedbackBooking] = useState<Booking | null>(null);
+  const [showFeedbackDialog, setShowFeedbackDialog] = useState(false);
 
   useEffect(() => {
     if (user) {
       // For passengers - fetch their bookings
       if (userRole === "passenger") {
-        const userBookings = mockBookings.filter(booking => booking.passengerId === user.id);
+        // Use bookings from context or fallback to mock data
+        const userBookings = contextBookings.length > 0 
+          ? contextBookings
+          : mockBookings.filter(booking => booking.passengerId === user.id);
         setBookings(userBookings);
       }
       
@@ -37,7 +49,7 @@ export default function BookingsPage() {
         setOfferedRides(userRides);
       }
     }
-  }, [user, userRole]);
+  }, [user, userRole, contextBookings]);
 
   const filterBookingsByStatus = (status: 'upcoming' | 'past' | 'cancelled') => {
     const now = new Date();
@@ -56,7 +68,9 @@ export default function BookingsPage() {
         if (!ride) return false;
         
         const rideDate = new Date(`${ride.departureDate}T${ride.departureTime}`);
-        return (rideDate < now && booking.status !== 'cancelled') || booking.status === 'completed';
+        return (rideDate < now && booking.status !== 'cancelled') || 
+               booking.status === 'completed' || 
+               (booking.punchedIn && booking.punchedOut);
       });
     } else {
       return bookings.filter(booking => booking.status === 'cancelled' || booking.status === 'rejected');
@@ -82,19 +96,18 @@ export default function BookingsPage() {
   };
 
   const handlePunchIn = (bookingId: string) => {
-    // In a real application, this would call an API to update the booking status
-    toast({
-      title: "Punched In",
-      description: "You have successfully punched in for this ride.",
-    });
+    startRide(bookingId);
   };
 
   const handlePunchOut = (bookingId: string) => {
-    // In a real application, this would call an API to update the booking status
-    toast({
-      title: "Punched Out",
-      description: "You have successfully completed this ride.",
-    });
+    finishRide(bookingId);
+    
+    // Find the completed booking to show feedback dialog
+    const completedBooking = bookings.find(b => b.id === bookingId);
+    if (completedBooking) {
+      setFeedbackBooking(completedBooking);
+      setShowFeedbackDialog(true);
+    }
   };
 
   const handleApproveRequest = (bookingId: string) => {
@@ -116,6 +129,9 @@ export default function BookingsPage() {
   return (
     <Layout>
       <div className="min-h-screen bg-gray-50 py-8">
+        {/* Active Ride Banner */}
+        <ActiveRideBanner onFinish={handlePunchOut} />
+        
         <div className="container mx-auto px-4">
           <h1 className="text-3xl font-bold mb-8">
             {userRole === "passenger" ? "My Bookings" : "My Rides"}
@@ -165,6 +181,10 @@ export default function BookingsPage() {
                           booking={booking}
                           userRole={userRole}
                           isPast
+                          onFeedback={() => {
+                            setFeedbackBooking(booking);
+                            setShowFeedbackDialog(true);
+                          }}
                         />
                       ))}
                     </div>
@@ -256,6 +276,15 @@ export default function BookingsPage() {
         </div>
 
         <SOSButton />
+        
+        {/* Feedback Dialog */}
+        {feedbackBooking && (
+          <FeedbackDialog 
+            booking={feedbackBooking}
+            isOpen={showFeedbackDialog}
+            onClose={() => setShowFeedbackDialog(false)}
+          />
+        )}
       </div>
     </Layout>
   );
@@ -265,6 +294,7 @@ function BookingCard({
   booking, 
   onPunchIn, 
   onPunchOut, 
+  onFeedback,
   userRole,
   isPast = false,
   isCancelled = false
@@ -272,6 +302,7 @@ function BookingCard({
   booking: Booking;
   onPunchIn?: () => void;
   onPunchOut?: () => void;
+  onFeedback?: () => void;
   userRole: string;
   isPast?: boolean;
   isCancelled?: boolean;
@@ -303,10 +334,22 @@ function BookingCard({
                 Pending
               </Badge>
             )}
-            {booking.status === 'approved' && (
+            {booking.status === 'approved' && !booking.punchedIn && (
               <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">
                 <CheckCircle className="w-3 h-3 mr-1" />
                 Approved
+              </Badge>
+            )}
+            {booking.punchedIn && !booking.punchedOut && (
+              <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200">
+                <PlayCircle className="w-3 h-3 mr-1" />
+                In Progress
+              </Badge>
+            )}
+            {booking.punchedIn && booking.punchedOut && (
+              <Badge variant="outline" className="bg-purple-50 text-purple-700 border-purple-200">
+                <CheckCircle className="w-3 h-3 mr-1" />
+                Completed
               </Badge>
             )}
             {booking.status === 'rejected' && (
@@ -378,10 +421,10 @@ function BookingCard({
                   />
                   
                   <Button
-                    className="w-full mt-2 bg-lau-green hover:bg-lau-dark"
+                    className="w-full mt-2 bg-lau-green hover:bg-lau-dark flex items-center justify-center"
                     onClick={onPunchIn}
                   >
-                    Punch In - Start Ride
+                    <PlayCircle className="mr-2" /> Start Ride
                   </Button>
                 </>
               )}
@@ -393,20 +436,41 @@ function BookingCard({
                     Ride in progress
                   </p>
                   <Button
-                    className="w-full bg-blue-600 hover:bg-blue-700"
+                    className="w-full bg-blue-600 hover:bg-blue-700 flex items-center justify-center"
                     onClick={onPunchOut}
                   >
-                    Punch Out - End Ride
+                    <StopCircle className="mr-2" /> End Ride
                   </Button>
                 </div>
               )}
               
               {booking.punchedIn && booking.punchedOut && (
-                <p className="text-sm text-blue-600 flex items-center">
-                  <CheckCircle className="w-4 h-4 mr-1" />
-                  Ride completed
-                </p>
+                <div className="space-y-2">
+                  <p className="text-sm text-blue-600 flex items-center">
+                    <CheckCircle className="w-4 h-4 mr-1" />
+                    Ride completed
+                  </p>
+                  <Button
+                    className="w-full bg-lau-green hover:bg-lau-dark"
+                    onClick={onFeedback}
+                  >
+                    Rate this Ride
+                  </Button>
+                </div>
               )}
+            </div>
+          )}
+          
+          {/* Show Rate button for past rides */}
+          {isPast && booking.punchedOut && onFeedback && (
+            <div className="border-t pt-4 mt-2">
+              <Button
+                variant="outline"
+                className="w-full hover:bg-gray-50"
+                onClick={onFeedback}
+              >
+                <Star className="mr-2" /> Rate this Ride
+              </Button>
             </div>
           )}
         </div>
