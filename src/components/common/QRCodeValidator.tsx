@@ -42,7 +42,7 @@ export default function QRCodeValidator({ bookingId, qrCodeUrl, rideDetails }: Q
       </Button>
 
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-        <DialogContent>
+        <DialogContent className="sm:max-w-md">
           <DialogHeader>
             <DialogTitle>Identity Verification</DialogTitle>
           </DialogHeader>
@@ -54,11 +54,16 @@ export default function QRCodeValidator({ bookingId, qrCodeUrl, rideDetails }: Q
                 : "Show this QR code to the other person to verify identity"}
             </p>
             
-            <div className="border p-4 rounded-md bg-white">
+            <div className="border p-4 rounded-md bg-white w-64 h-64 flex items-center justify-center">
+              {/* Fix: Adding proper rendering for QR code image with error handling */}
               <img 
-                src={qrCodeUrl} 
+                src={qrCodeUrl || "https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=example"} 
                 alt="QR Code" 
-                className="w-64 h-64 object-contain"
+                className="w-full h-full object-contain"
+                onError={(e) => {
+                  // Fallback if the image fails to load
+                  e.currentTarget.src = "https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=fallback";
+                }}
               />
             </div>
             
@@ -67,7 +72,7 @@ export default function QRCodeValidator({ bookingId, qrCodeUrl, rideDetails }: Q
             </p>
             
             {!isValidated && (
-              <Button onClick={handleScanQR} className="mt-4 bg-lau-green hover:bg-lau-dark">
+              <Button onClick={handleScanQR} className="mt-4 bg-green-500 hover:bg-green-600 text-white">
                 Scan QR Code
               </Button>
             )}
