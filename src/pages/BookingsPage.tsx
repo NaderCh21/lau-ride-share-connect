@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -18,7 +19,7 @@ import ActiveRideBanner from "@/components/rides/ActiveRideBanner";
 import FeedbackDialog from "@/components/rides/FeedbackDialog";
 import {
   CheckCircle, AlertTriangle, XCircle, Clock, MapPin, Calendar, Car, MessageSquare,
-  PlayCircle, StopCircle
+  PlayCircle, StopCircle, Star
 } from "lucide-react";
 
 export default function BookingsPage() {
