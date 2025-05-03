@@ -28,14 +28,17 @@ export default function ActiveRideBanner({ onFinish }: ActiveRideBannerProps) {
               {driverName.substring(0, 2).toUpperCase()}
             </AvatarFallback>
           </Avatar>
-          <span className="font-medium">Ride in progress with {driverName}</span>
+          <div>
+            <span className="font-medium text-lg">Ride in progress</span>
+            <p className="text-sm text-gray-200">with {driverName}</p>
+          </div>
         </div>
         <div className="flex gap-2">
-          <Button variant="destructive" size="sm">
+          <Button variant="destructive" size="sm" className="font-bold">
             SOS
           </Button>
           <Button 
-            className="bg-green-500 hover:bg-green-600" 
+            className="bg-green-500 hover:bg-green-600 font-bold text-white" 
             size="sm" 
             onClick={() => onFinish(activeRide.id)}
           >

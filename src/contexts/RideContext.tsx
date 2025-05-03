@@ -33,24 +33,66 @@ export const RideProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [loading, setLoading] = useState(true);
   const { toast } = useToast();
 
+  // Create a future date for upcoming rides (tomorrow)
+  const getTomorrowDate = () => {
+    const tomorrow = new Date();
+    tomorrow.setDate(tomorrow.getDate() + 1);
+    return tomorrow.toISOString().split('T')[0]; // YYYY-MM-DD format
+  };
+
   // Initialize with mock data
   useEffect(() => {
     setRides(mockRides);
     
-    // Initialize bookings (this would normally come from an API)
+    // Create today and tomorrow rides for testing
+    const today = new Date().toISOString().split('T')[0];
+    const tomorrow = getTomorrowDate();
+    
+    // Update mock rides with current dates
+    const updatedRides = mockRides.map((ride, index) => {
+      if (index === 0) {
+        return { ...ride, departureDate: today };
+      } else if (index === 1) {
+        return { ...ride, departureDate: tomorrow };
+      }
+      return ride;
+    });
+    
+    setRides(updatedRides);
+    
+    // Initialize bookings with upcoming approved ride for testing
     const mockBookings: Booking[] = [];
-    mockRides.forEach(ride => {
-      mockBookings.push({
-        id: `booking-${ride.id}`,
-        rideId: ride.id,
-        ride: ride,
-        passengerId: 'user1', // Mock passenger ID
-        status: 'approved',
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-        punchedIn: false,
-        punchedOut: false
-      });
+    
+    // Add an approved booking for today
+    mockBookings.push({
+      id: `booking-test-1`,
+      rideId: updatedRides[0].id,
+      ride: updatedRides[0],
+      passengerId: 'user1', // Mock passenger ID
+      status: 'approved',
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+      punchedIn: false,
+      punchedOut: false,
+      qrCode: "https://example.com/qr/test1",
+    });
+    
+    // Add the rest of the mock bookings
+    updatedRides.forEach((ride, index) => {
+      if (index > 0) { // Skip the first one as we already added it
+        mockBookings.push({
+          id: `booking-${ride.id}`,
+          rideId: ride.id,
+          ride: ride,
+          passengerId: 'user1', // Mock passenger ID
+          status: index === 1 ? 'approved' : 'pending',
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+          punchedIn: false,
+          punchedOut: false,
+          qrCode: `https://example.com/qr/${ride.id}`,
+        });
+      }
     });
     
     setBookings(mockBookings);
